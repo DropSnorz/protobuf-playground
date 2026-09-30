@@ -30,12 +30,12 @@ export type NodeStatus = 'ok' | 'skipped' | 'unknown' | 'warn' | 'error';
 export interface TraceNode {
   id: string;
   /**
-   * field    — a tagged record on the wire
-   * element  — a value inside a packed record (no tag of its own)
-   * group    — logical grouping of several records (repeated / map field)
-   * skipped  — field not written (producer) / absent from the wire (consumer)
-   * unknown  — consumer: tag not in its schema
-   * error    — consumer: where parsing failed
+   * field:    a tagged record on the wire
+   * element:  a value inside a packed record (no tag of its own)
+   * group:    logical grouping of several records (repeated / map field)
+   * skipped:  field not written (producer) / absent from the wire (consumer)
+   * unknown:  consumer: tag not in its schema
+   * error:    consumer: where parsing failed
    */
   kind: 'field' | 'element' | 'group' | 'skipped' | 'unknown' | 'error';
   path: string;

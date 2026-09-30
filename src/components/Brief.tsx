@@ -1,7 +1,8 @@
+import { Check, ChevronDown, ChevronUp, Eye, Link2, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import type { Scenario } from '../scenarios';
 import { Rich } from './Rich';
-import { VERDICT_META } from './Sidebar';
+import { VERDICT_META, VerdictIcon } from './Sidebar';
 
 export function Brief({ scenario, modified, onReset, onShare, shared }: {
   scenario: Scenario | undefined;
@@ -18,7 +19,7 @@ export function Brief({ scenario, modified, onReset, onShare, shared }: {
           {scenario ? (
             <>
               <span className={`verdict ${VERDICT_META[scenario.verdict].cls}`}>
-                <span className="v-icon">{VERDICT_META[scenario.verdict].icon}</span>
+                <VerdictIcon verdict={scenario.verdict} />
                 {VERDICT_META[scenario.verdict].label}
               </span>
               <span className="brief-cat">{scenario.category}</span>
@@ -32,15 +33,23 @@ export function Brief({ scenario, modified, onReset, onShare, shared }: {
         <div className="brief-actions">
           {scenario && modified && (
             <button className="btn btn-ghost" onClick={onReset} title="Restore the scenario's original schemas and message">
-              ↺ Reset scenario
+              <RotateCcw size={14} /> Reset scenario
             </button>
           )}
           <button className="btn btn-ghost" onClick={onShare} title="Copy a link containing the current schemas and message">
-            {shared ? '✓ Link copied' : '🔗 Share'}
+            {shared ? (
+              <>
+                <Check size={14} /> Link copied
+              </>
+            ) : (
+              <>
+                <Link2 size={14} /> Share
+              </>
+            )}
           </button>
           {scenario && (
             <button className="btn btn-ghost" onClick={() => setOpen(!open)} aria-expanded={open}>
-              {open ? 'Hide notes ▴' : 'Show notes ▾'}
+              {open ? 'Hide notes' : 'Show notes'} {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
           )}
         </div>
@@ -55,7 +64,9 @@ export function Brief({ scenario, modified, onReset, onShare, shared }: {
             ))}
           </div>
           <div className="brief-observe">
-            <div className="observe-title">👀 What to watch</div>
+            <div className="observe-title">
+              <Eye size={15} /> What to watch
+            </div>
             <ul>
               {scenario.observe.map((o, i) => (
                 <li key={i}>

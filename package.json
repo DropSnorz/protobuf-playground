@@ -18,6 +18,7 @@
     "@codemirror/state": "^6.7.6",
     "@codemirror/view": "^6.43.13",
     "@uiw/react-codemirror": "^4.25.12",
+    "lucide-react": "^1.49.0",
     "protobufjs": "^7.6.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"

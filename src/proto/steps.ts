@@ -40,7 +40,7 @@ function encodeSteps(nodes: TraceNode[], out: Step[], total: number) {
     if (n.kind === 'group') {
       out.push({
         ...base,
-        title: `\`${n.label}\` (${n.typeName}) — ${n.display}`,
+        title: `\`${n.label}\` (${n.typeName}): ${n.display}`,
         detail: n.notes,
         status: 'info',
         emitted: n.start,
@@ -53,7 +53,7 @@ function encodeSteps(nodes: TraceNode[], out: Step[], total: number) {
       out.push({
         ...base,
         title: `Element ${n.label} = ${n.display}`,
-        detail: ['Packed elements have no tag: just the encoded values, one after another.'],
+        detail: ['Packed elements have no tag of their own. The encoded values follow one another.'],
         status: 'ok',
         emitted: n.end,
         range: { start: n.start, end: n.end },
@@ -67,7 +67,7 @@ function encodeSteps(nodes: TraceNode[], out: Step[], total: number) {
       ...base,
       title: `\`${n.label}\` → tag ${tagHex(n)}`,
       detail: [
-        `Field number **${n.fieldNumber}**, wire type **${n.wireType} (${WIRE_TYPE_NAMES[n.wireType!]})**. The field *name* is never sent — only its number.`,
+        `Field number **${n.fieldNumber}**, wire type **${n.wireType} (${WIRE_TYPE_NAMES[n.wireType!]})**. Only the field number is sent, never its name.`,
       ],
       status: 'ok',
       emitted: tag.end,
@@ -169,7 +169,7 @@ function decodeSteps(nodes: TraceNode[], out: Step[], total: number, typeName: s
       out.push({
         ...base,
         title: `Skip ${n.end - tag.end} byte(s) of unknown field #${n.fieldNumber}`,
-        detail: [...n.notes, `Raw content: ${n.display}.`, 'The wire type alone is enough to know how many bytes to skip — that is what makes forward compatibility possible.'],
+        detail: [...n.notes, `Raw content: ${n.display}.`, 'The wire type tells the parser how many bytes to skip, which is what makes forward compatibility possible.'],
         status: n.status === 'warn' ? 'warn' : 'unknown',
         consumed: n.end,
         range: { start: tag.end, end: n.end },
@@ -269,7 +269,7 @@ export function buildSteps(opts: {
       phase: 'encode',
       title: `Serialized: ${total} byte${total === 1 ? '' : 's'}`,
       detail: total
-        ? ['That is the whole message. No header, no field names, no type name, no schema — just records back to back.']
+        ? ['The message ends here. It has no header, field names, type name or schema, only records back to back.']
         : ['An empty message (all fields default) serializes to **zero bytes**.'],
       status: 'ok',
       emitted: total,
@@ -281,7 +281,7 @@ export function buildSteps(opts: {
     phase: 'transmit',
     title: `Send ${total} byte${total === 1 ? '' : 's'}`,
     detail: [
-      'Only raw bytes travel (Kafka record, HTTP body, gRPC frame, file…). The consumer must bring **its own** `.proto` to interpret them — possibly a different version.',
+      'Only raw bytes travel (Kafka record, HTTP body, gRPC frame, file…). The consumer must bring **its own** `.proto` to interpret them, possibly a different version.',
     ],
     status: 'info',
     emitted: total,
@@ -315,7 +315,7 @@ export function buildSteps(opts: {
     }
     steps.push({
       phase: 'done',
-      title: dec.ok ? (s.warnings || s.unknown ? 'Decoded — with surprises' : 'Decoded successfully') : 'Parsing failed',
+      title: dec.ok ? (s.warnings || s.unknown ? 'Decoded with warnings' : 'Decoded successfully') : 'Parsing failed',
       detail,
       status: dec.ok ? (s.warnings ? 'warn' : 'ok') : 'error',
       emitted: total,

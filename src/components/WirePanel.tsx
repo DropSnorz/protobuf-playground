@@ -1,3 +1,4 @@
+import { Pencil, Undo2 } from 'lucide-react';
 import { useState } from 'react';
 import type { Step } from '../proto/steps';
 import type { ByteInfo, Range } from '../proto/trace';
@@ -29,7 +30,7 @@ interface Props {
 }
 
 function describe(info: ByteInfo | null): string {
-  if (!info) return '—';
+  if (!info) return '-';
   const n = info.node;
   if (n.kind === 'error') return 'parse error';
   const name = n.kind === 'unknown' ? `unknown #${n.fieldNumber}` : n.path || n.label;
@@ -66,12 +67,12 @@ export function WirePanel(p: Props) {
               }}
               title="Type your own bytes to simulate buggy producers, truncation, concatenation…"
             >
-              ✎ Edit bytes
+              <Pencil size={14} /> Edit bytes
             </button>
           )}
           {p.override !== null && !editing && (
             <button className="btn btn-ghost" onClick={() => p.onOverride(null)} title="Go back to the producer's encoded output">
-              ↺ Use producer output
+              <Undo2 size={14} /> Use producer output
             </button>
           )}
         </div>
@@ -104,7 +105,7 @@ export function WirePanel(p: Props) {
       {editing ? (
         <div className="hex-editor">
           <label className="buffer-label" htmlFor="hex-input">
-            Bytes (hex) — spaces optional
+            Bytes in hex (spaces optional)
           </label>
           <textarea id="hex-input" value={draft} onChange={(e) => setDraft(e.target.value)} spellCheck={false} rows={4} />
           {typeof parsed === 'string' && <div className="error-text">{parsed}</div>}
@@ -139,7 +140,7 @@ export function WirePanel(p: Props) {
             hoverRanges={p.hoverRanges}
             onHover={p.onHoverByte}
             animKey={`p${p.index}`}
-            emptyText={step.phase === 'encode' && step.emitted === 0 && total > 0 ? 'Nothing written yet…' : 'Empty buffer — 0 bytes'}
+            emptyText={step.phase === 'encode' && step.emitted === 0 && total > 0 ? 'Nothing written yet…' : 'Empty buffer (0 bytes)'}
           />
 
           <div className={`pipe ${transmitting ? 'pipe-active' : ''} ${received ? 'pipe-done' : ''}`} aria-hidden>
@@ -173,7 +174,7 @@ export function WirePanel(p: Props) {
             arriving={transmitting}
             animKey={transmitting ? `t${p.index}` : 'c'}
             errorRange={step.phase === 'done' || (step.phase === 'decode' && step.status === 'error') ? p.errorRange : undefined}
-            emptyText="Empty message — 0 bytes"
+            emptyText="Empty message (0 bytes)"
           />
 
           <div className="inspector">

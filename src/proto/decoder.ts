@@ -95,7 +95,7 @@ class Decoder {
       }
       if (wt === WireType.SGROUP || wt === WireType.EGROUP) {
         throw new WireError(
-          `Wire type ${wt} (${WIRE_TYPE_NAMES[wt]}) is a deprecated proto2 group — not supported in proto3`,
+          `Wire type ${wt} (${WIRE_TYPE_NAMES[wt]}) is a deprecated proto2 group, not supported in proto3`,
           recStart,
           tagEnd,
         );
@@ -127,7 +127,7 @@ class Decoder {
         const l = r.varint();
         if (l > BigInt(end - r.pos)) {
           throw new WireError(
-            `Length prefix says ${l} bytes but only ${end - r.pos} remain — truncated or corrupt message`,
+            `Length prefix says ${l} bytes but only ${end - r.pos} remain. The message is truncated or corrupt`,
             recStart,
             end,
           );
@@ -516,7 +516,7 @@ class Decoder {
         `\`${def.name}\` was already set to ${(slot.value as { display: string }).display}: for a singular scalar field the **last value wins**.`,
       );
     }
-    if (typeof v === 'number' && Object.is(v, -0)) node.notes.push('-0.0 — it was on the wire, so it is kept distinct from 0.');
+    if (typeof v === 'number' && Object.is(v, -0)) node.notes.push('-0.0 was on the wire, so it is kept distinct from 0.');
     const prevIds = slot && !def.oneof ? slot.nodeIds : [];
     acc.slots.set(def.number, {
       def,

@@ -1,3 +1,4 @@
+import { TriangleAlert } from 'lucide-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 import type { DecodedField, DecodedMessage, DValue } from '../proto/decoder';
 import type { TraceNode } from '../proto/trace';
@@ -72,7 +73,7 @@ export function DecodeTree({ message, nodesByPath, follow, revealed }: Props) {
 
   const renderValue = (v: DValue, path: string, depth: number, rootNum: number, label: string, f: DecodedField['def']): ReactNode[] => {
     const { notes, warn } = notesFor(path);
-    const badge = warn ? <span className="badge badge-warn">⚠</span> : null;
+    const badge = warn ? <span className="badge badge-warn" title="Warning"><TriangleAlert size={12} /></span> : null;
     switch (v.k) {
       case 'scalar':
         return [
@@ -92,7 +93,7 @@ export function DecodeTree({ message, nodesByPath, follow, revealed }: Props) {
           if (e.value.k === 'message') {
             const n = notesFor(ep);
             return [
-              rowEl({ path: ep, depth, name: `[${e.keyDisplay}]`, value: <span className="muted">{'{…}'}</span>, rootNum, badge: n.warn ? <span className="badge badge-warn">⚠</span> : null, title: n.notes.join('\n') }),
+              rowEl({ path: ep, depth, name: `[${e.keyDisplay}]`, value: <span className="muted">{'{…}'}</span>, rootNum, badge: n.warn ? <span className="badge badge-warn" title="Warning"><TriangleAlert size={12} /></span> : null, title: n.notes.join('\n') }),
               ...renderMessage(e.value.msg, `${ep}.value`, depth + 1, rootNum),
             ];
           }
@@ -104,7 +105,7 @@ export function DecodeTree({ message, nodesByPath, follow, revealed }: Props) {
               name: `[${e.keyDisplay}]`,
               value: e.value.k === 'scalar' ? e.value.display : '',
               rootNum,
-              badge: n.warn ? <span className="badge badge-warn">⚠</span> : null,
+              badge: n.warn ? <span className="badge badge-warn" title="Warning"><TriangleAlert size={12} /></span> : null,
               cls: n.warn ? 'trow-warn' : '',
               title: n.notes.join('\n'),
             }),
@@ -145,7 +146,7 @@ export function DecodeTree({ message, nodesByPath, follow, revealed }: Props) {
       name: f.def.name,
       type: f.def.displayType,
       value: v.k === 'scalar' ? v.display : v.k === 'message' ? <span className="muted">{'{…}'}</span> : <span className="muted">{f.display}</span>,
-      badge: warn || f.status === 'warn' ? <span className="badge badge-warn">⚠</span> : null,
+      badge: warn || f.status === 'warn' ? <span className="badge badge-warn" title="Warning"><TriangleAlert size={12} /></span> : null,
       cls: warn || f.status === 'warn' ? 'trow-warn' : '',
       title: notes.join('\n'),
     });

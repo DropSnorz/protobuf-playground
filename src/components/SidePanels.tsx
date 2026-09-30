@@ -1,3 +1,4 @@
+import { Hourglass, Link2 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import type { DecodedMessage } from '../proto/decoder';
 import type { EncodeIssue } from '../proto/encoder';
@@ -118,7 +119,7 @@ export function ProducerPanel(props: {
         }
       />
       <div className="tree-title">
-        What gets serialized <span className="muted">— field-number order</span>
+        What gets serialized <span className="muted">in field-number order</span>
       </div>
       {props.overridden && (
         <div className="problem problem-warn">The wire carries hand-crafted bytes: this encoding is shown for reference but is <strong>not</strong> what is sent.</div>
@@ -165,7 +166,7 @@ export function ConsumerPanel(props: {
         <span className="tab-spacer" />
         {props.linked ? (
           <button className="link-toggle" onClick={props.onUnlink} title="Give the consumer its own copy of the schema to edit">
-            🔗 Same as producer · <strong>edit separately</strong>
+            <Link2 size={13} /> Same as producer · <strong>edit separately</strong>
           </button>
         ) : (
           <button className="link-toggle" onClick={props.onLink} title="Use the producer schema on both sides">
@@ -190,12 +191,14 @@ export function ConsumerPanel(props: {
       {props.parseError && (
         <div className="problem problem-error">
           <Rich text={props.parseError} />
-          <div className="small">Partial content below is what the parser had read before failing — real libraries discard it.</div>
+          <div className="small">Partial content below is what the parser had read before failing. Real libraries discard it.</div>
         </div>
       )}
       {props.waiting ? (
         <div className="tree waiting">
-          <div className="waiting-inner">⏳ Waiting for bytes…</div>
+          <div className="waiting-inner">
+            <Hourglass size={15} /> Waiting for bytes…
+          </div>
         </div>
       ) : (
         <DecodeTree message={props.message} nodesByPath={props.nodesByPath} follow={props.follow} revealed={props.revealed} />

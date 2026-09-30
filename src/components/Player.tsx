@@ -1,3 +1,4 @@
+import { Check, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
 import type { Phase, Step } from '../proto/steps';
 
 const PHASES: { id: Phase; label: string }[] = [
@@ -18,7 +19,7 @@ export function PhaseBar({ phase, status }: { phase: Phase; status: Step['status
             i === idx && p.id === 'done' ? `phase-${status}` : ''
           }`}
         >
-          <span className="phase-num">{i < idx ? '✓' : i + 1}</span>
+          <span className="phase-num">{i < idx ? <Check size={11} strokeWidth={3} /> : i + 1}</span>
           {p.label}
         </li>
       ))}
@@ -40,19 +41,27 @@ export function Player(props: {
   return (
     <div className="player">
       <div className="player-buttons">
-        <button className="icon-btn" title="Restart (Home)" onClick={() => props.onIndex(0)} disabled={index === 0}>
-          ⏮
+        <button className="icon-btn" title="Restart (Home)" onClick={() => props.onIndex(0)} disabled={index === 0} aria-label="Restart">
+          <SkipBack size={14} />
         </button>
-        <button className="icon-btn" title="Previous step (←)" onClick={() => props.onIndex(Math.max(0, index - 1))} disabled={index === 0}>
-          ◀
+        <button className="icon-btn" title="Previous step (←)" onClick={() => props.onIndex(Math.max(0, index - 1))} disabled={index === 0} aria-label="Previous step">
+          <ChevronLeft size={16} />
         </button>
         {props.playing ? (
           <button className="play-btn" title="Pause (space)" onClick={props.onPause}>
-            ❚❚ Pause
+            <Pause size={14} /> Pause
           </button>
         ) : (
           <button className="play-btn" title="Play (space)" onClick={props.onPlay}>
-            ▶ {index >= count - 1 ? 'Replay' : 'Play'}
+            {index >= count - 1 ? (
+              <>
+                <RotateCcw size={14} /> Replay
+              </>
+            ) : (
+              <>
+                <Play size={14} /> Play
+              </>
+            )}
           </button>
         )}
         <button
@@ -60,11 +69,12 @@ export function Player(props: {
           title="Next step (→)"
           onClick={() => props.onIndex(Math.min(count - 1, index + 1))}
           disabled={index >= count - 1}
+          aria-label="Next step"
         >
-          ▶
+          <ChevronRight size={16} />
         </button>
-        <button className="icon-btn" title="Jump to result (End)" onClick={() => props.onIndex(count - 1)} disabled={index >= count - 1}>
-          ⏭
+        <button className="icon-btn" title="Jump to result (End)" onClick={() => props.onIndex(count - 1)} disabled={index >= count - 1} aria-label="Jump to result">
+          <SkipForward size={14} />
         </button>
       </div>
       <input

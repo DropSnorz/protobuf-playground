@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { Check, TriangleAlert, X } from 'lucide-react';
+import { useMemo, useState, type ReactNode } from 'react';
 import type { DiffEntry } from '../proto/diff';
 import type { Step } from '../proto/steps';
 import type { ByteInfo, Range } from '../proto/trace';
@@ -11,7 +12,7 @@ import { Rich } from './Rich';
 type Tab = 'bytes' | 'diff' | 'json' | 'timeline';
 
 function meaning(info: ByteInfo | null): { text: string; color: string } {
-  if (!info) return { text: '—', color: 'fc-none' };
+  if (!info) return { text: '-', color: 'fc-none' };
   const n = info.node;
   const color = fieldColorClass(info.root.fieldNumber, info.node.kind === 'unknown' || info.root.kind === 'unknown' ? 'unknown' : info.node.kind === 'error' ? 'error' : undefined);
   if (n.kind === 'error') return { text: n.display, color };
@@ -72,7 +73,23 @@ function ByteTable({ bytes, pAnn, cAnn }: { bytes: Uint8Array; pAnn: (ByteInfo |
   );
 }
 
-const SEV: Record<DiffEntry['severity'], string> = { compatible: '✓ compatible', caution: '! caution', breaking: '✕ breaking' };
+const SEV: Record<DiffEntry['severity'], ReactNode> = {
+  compatible: (
+    <>
+      <Check size={12} strokeWidth={3} /> compatible
+    </>
+  ),
+  caution: (
+    <>
+      <TriangleAlert size={12} strokeWidth={2.5} /> caution
+    </>
+  ),
+  breaking: (
+    <>
+      <X size={12} strokeWidth={3} /> breaking
+    </>
+  ),
+};
 
 function SchemaDiff({ entries, linked }: { entries: DiffEntry[]; linked: boolean }) {
   if (linked) return <div className="empty">Both sides use the same schema. Click <strong>edit separately</strong> on the consumer to simulate a different version.</div>;

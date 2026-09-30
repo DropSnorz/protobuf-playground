@@ -21,7 +21,7 @@ function typeCompat(p: FieldDef, c: FieldDef): { severity: Severity; detail: str
     if (pt === ct) return null;
     return {
       severity: 'compatible',
-      detail: 'A map is wire-identical to `repeated Entry { key = 1; value = 2; }` — compatible only if the other side declares exactly that entry message.',
+      detail: 'A map is wire-identical to `repeated Entry { key = 1; value = 2; }`. It stays compatible as long as the other side declares exactly that entry message.',
     };
   }
   if (pt === 'message' && ct === 'message') return null; // compared recursively
@@ -40,7 +40,7 @@ function typeCompat(p: FieldDef, c: FieldDef): { severity: Severity; detail: str
     return {
       severity: 'caution',
       detail:
-        'Same VARINT encoding, so it parses — but values may be truncated to 32 bits, change sign, or become `true` for any non-zero value.',
+        'Same VARINT encoding, so it parses. Values may still be truncated to 32 bits, change sign, or become `true` for any non-zero value.',
     };
   }
   if ((pn === 'sint32' || pn === 'sint64') && (cn === 'sint32' || cn === 'sint64')) {
@@ -56,10 +56,10 @@ function typeCompat(p: FieldDef, c: FieldDef): { severity: Severity; detail: str
     return { severity: 'compatible', detail: 'Both LEN: the consumer receives the raw UTF-8 bytes.' };
   }
   if (pn === 'bytes' && cn === 'string') {
-    return { severity: 'caution', detail: 'Both LEN: works only while the bytes happen to be valid UTF-8 — otherwise the whole message fails to parse.' };
+    return { severity: 'caution', detail: 'Both LEN: works only while the bytes happen to be valid UTF-8. Otherwise the whole message fails to parse.' };
   }
   if (pn === 'message' && cn === 'bytes') {
-    return { severity: 'compatible', detail: 'An embedded message is just LEN bytes: the consumer gets it as an opaque blob it can forward or parse later.' };
+    return { severity: 'compatible', detail: 'An embedded message is plain LEN bytes. The consumer gets it as an opaque blob it can forward or parse later.' };
   }
   if (pn === 'bytes' && cn === 'message') {
     return { severity: 'caution', detail: 'The consumer parses the bytes as a message: fine if they are a serialized message, garbage or a parse failure otherwise.' };
@@ -105,7 +105,7 @@ export function diffSchemas(ps: Schema, pType: string, cs: Schema, cType: string
             where: w,
             severity: 'breaking',
             title: `\`${p.name}\` renumbered: #${p.number} → #${moved.number}`,
-            detail: `The producer writes #${p.number}, the consumer looks for #${moved.number}: data lands in an unknown field and \`${p.name}\` reads as its default. Field numbers are the contract — never change them.`,
+            detail: `The producer writes #${p.number}, the consumer looks for #${moved.number}: data lands in an unknown field and \`${p.name}\` reads as its default. Never change the number of an existing field.`,
           });
           continue;
         }
@@ -126,7 +126,7 @@ export function diffSchemas(ps: Schema, pType: string, cs: Schema, cType: string
           title: `#${n} \`${c.name}\` never sent by the producer`,
           detail: c.hasPresence
             ? 'The consumer sees it as *not set* (has_… = false).'
-            : 'The consumer sees the default value (0 / "" / false / first enum value) — indistinguishable from an explicit default.',
+            : 'The consumer sees the default value (0 / "" / false / first enum value), which looks the same as an explicit default.',
         });
         continue;
       }
@@ -178,7 +178,7 @@ export function diffSchemas(ps: Schema, pType: string, cs: Schema, cType: string
           out.push({
             where: w,
             severity: 'caution',
-            title: `#${n} oneof membership: ${p.oneof ?? '—'} → ${c.oneof ?? '—'}`,
+            title: `#${n} oneof membership: ${p.oneof ?? 'none'} → ${c.oneof ?? 'none'}`,
             detail: 'Binary compatible for a single field, but moving several existing fields into a oneof can drop data (only the last one on the wire survives).',
           });
         }
@@ -188,7 +188,7 @@ export function diffSchemas(ps: Schema, pType: string, cs: Schema, cType: string
             severity: p.explicitOptional ? 'compatible' : 'caution',
             title: `#${n} ${p.explicitOptional ? 'optional → implicit presence' : 'implicit → optional'}`,
             detail: p.explicitOptional
-              ? 'Wire compatible. The consumer simply loses the ability to tell "set to 0" from "not set".'
+              ? 'Wire compatible. The consumer loses the ability to tell "set to 0" from "not set".'
               : 'Wire compatible, but the producer never writes zero values: the consumer sees *not set* when the producer meant 0.',
           });
         }
@@ -214,7 +214,7 @@ export function diffSchemas(ps: Schema, pType: string, cs: Schema, cType: string
           detail: 'proto3 enums are open: the consumer keeps the raw number (UNRECOGNIZED in Java). Code must handle it.',
         });
       } else if (!a && b) {
-        out.push({ where: `${where}: enum ${ce.name}`, severity: 'compatible', title: `Enum value ${b} = ${n} never produced`, detail: 'Nothing to worry about on the wire.' });
+        out.push({ where: `${where}: enum ${ce.name}`, severity: 'compatible', title: `Enum value ${b} = ${n} never produced`, detail: 'No impact on the wire.' });
       } else if (a && b && a !== b) {
         out.push({
           where: `${where}: enum ${ce.name}`,

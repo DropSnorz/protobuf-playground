@@ -1,12 +1,22 @@
+import { Check, Info, TriangleAlert, X, type LucideIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CATEGORIES, SCENARIOS, type Verdict } from '../scenarios';
 
-export const VERDICT_META: Record<Verdict, { icon: string; label: string; cls: string }> = {
-  learn: { icon: 'i', label: 'How it works', cls: 'v-learn' },
-  compatible: { icon: '✓', label: 'Compatible', cls: 'v-compatible' },
-  caution: { icon: '!', label: 'Lossy / surprising', cls: 'v-caution' },
-  breaking: { icon: '✕', label: 'Breaking / failure', cls: 'v-breaking' },
+export const VERDICT_META: Record<Verdict, { Icon: LucideIcon; label: string; cls: string }> = {
+  learn: { Icon: Info, label: 'How it works', cls: 'v-learn' },
+  compatible: { Icon: Check, label: 'Compatible', cls: 'v-compatible' },
+  caution: { Icon: TriangleAlert, label: 'Lossy / surprising', cls: 'v-caution' },
+  breaking: { Icon: X, label: 'Breaking / failure', cls: 'v-breaking' },
 };
+
+export function VerdictIcon({ verdict }: { verdict: Verdict }) {
+  const { Icon, cls } = VERDICT_META[verdict];
+  return (
+    <span className={`v-icon ${cls}`} aria-hidden>
+      <Icon size={11} strokeWidth={3} />
+    </span>
+  );
+}
 
 export function Sidebar({ current, onSelect, modified }: { current: string | null; onSelect: (id: string) => void; modified: boolean }) {
   const [q, setQ] = useState('');
@@ -42,7 +52,7 @@ export function Sidebar({ current, onSelect, modified }: { current: string | nul
             onClick={() => setFilter(filter === v ? null : v)}
             title={`Show only: ${VERDICT_META[v].label}`}
           >
-            <span className="v-icon">{VERDICT_META[v].icon}</span>
+            <VerdictIcon verdict={v} />
             {VERDICT_META[v].label}
           </button>
         ))}
@@ -58,7 +68,7 @@ export function Sidebar({ current, onSelect, modified }: { current: string | nul
                 onClick={() => onSelect(s.id)}
                 title={s.summary}
               >
-                <span className={`v-icon ${VERDICT_META[s.verdict].cls}`}>{VERDICT_META[s.verdict].icon}</span>
+                <VerdictIcon verdict={s.verdict} />
                 <span className="sitem-text">
                   <span className="sitem-title">{s.title}</span>
                   <span className="sitem-sum">{s.summary}</span>

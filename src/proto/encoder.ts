@@ -109,7 +109,7 @@ function convertScalar(ctx: Ctx, field: { type: string; kind: FieldDef['kind'] }
       if (typeof v === 'number') {
         if (!Number.isInteger(v)) throw new ConvertError(`expected an integer for ${t}`);
         if (!Number.isSafeInteger(v)) {
-          throw new ConvertError(`${v} exceeds JS safe integer range — pass 64-bit values as strings, e.g. "9007199254740993"`);
+          throw new ConvertError(`${v} exceeds the JS safe integer range. Pass 64-bit values as strings, e.g. "9007199254740993"`);
         }
         big = BigInt(v);
       } else if (typeof v === 'string' && /^-?\d+$/.test(v.trim())) {
@@ -366,10 +366,10 @@ function encodeMessage(ctx: Ctx, msg: MessageDef, value: unknown, path: string, 
     const raw = obj[f.name];
     if (raw === undefined || raw === null) {
       const why = f.oneof
-        ? `not the active member of oneof \`${f.oneof}\` — nothing written`
+        ? `not the active member of oneof \`${f.oneof}\`, nothing written`
         : f.hasPresence
-          ? 'not set — nothing written (the reader will see has_' + f.name + '() = false)'
-          : 'not set — nothing written; the reader will see the default value';
+          ? 'not set, nothing written (the reader will see has_' + f.name + '() = false)'
+          : 'not set, nothing written. The reader will see the default value.';
       parts.push({ bytes: [], nodes: [skipped(f, fp, depth, f.hasPresence && !f.repeated ? 'not set' : defaultDisplay(ctx, f), why)] });
       continue;
     }
@@ -392,7 +392,7 @@ function encodeField(ctx: Ctx, f: FieldDef, raw: unknown, fp: string, depth: num
     }
     const entries = Object.entries(raw as Record<string, unknown>);
     if (!entries.length) {
-      return { bytes: [], nodes: [skipped(f, fp, depth, '{}', 'empty map — nothing written')] };
+      return { bytes: [], nodes: [skipped(f, fp, depth, '{}', 'empty map, nothing written')] };
     }
     const keyField = { type: f.map.keyType, kind: 'scalar' as const };
     const valField = { type: f.map.valueType, kind: f.map.valueKind };
@@ -473,7 +473,7 @@ function encodeField(ctx: Ctx, f: FieldDef, raw: unknown, fp: string, depth: num
   if (f.repeated) {
     if (!Array.isArray(raw)) throw new ConvertError(`expected a JSON array for ${f.displayType}`);
     if (!raw.length) {
-      return { bytes: [], nodes: [skipped(f, fp, depth, '[]', 'empty repeated field — nothing written')] };
+      return { bytes: [], nodes: [skipped(f, fp, depth, '[]', 'empty repeated field, nothing written')] };
     }
     if (f.packed) {
       const elems: Encoded[] = raw.map((item, i) => {
@@ -603,7 +603,7 @@ function encodeSingle(ctx: Ctx, f: FieldDef, raw: unknown, fp: string, label: st
           fp,
           depth,
           display,
-          `${display} is the default value — proto3 does not serialize it (implicit presence). The reader cannot tell "0" from "not set".`,
+          `${display} is the default value, so proto3 does not serialize it (implicit presence). The reader cannot tell "0" from "not set".`,
         ),
       ],
     };

@@ -1,3 +1,4 @@
+import { ArrowLeftRight } from 'lucide-react';
 import type { Calc } from '../proto/trace';
 import { WIRE_TYPE_NAMES } from '../proto/types';
 import { hexByte } from '../proto/wire';
@@ -24,7 +25,7 @@ function VarintView({ value, bytes }: { value: bigint; bytes: number[] }) {
   return (
     <div className="calc-block">
       <div className="calc-caption">
-        Varint of <strong>{value.toString()}</strong> — 7 bits per byte, least significant group first
+        Varint of <strong>{value.toString()}</strong>: 7 bits per byte, least significant group first
       </div>
       <div className={`varint-row ${long ? 'varint-long' : ''}`}>
         {bytes.map((b, i) => (
@@ -183,7 +184,7 @@ export function CalcItem({ c }: { c: Calc }) {
         <div className="calc-block">
           <div className="calc-caption">Enum {c.enumName}: sent as its number</div>
           <div className="calc-line">
-            {c.name ? <code>{c.name}</code> : <span className="badge badge-warn">unknown name</span>} ⇄ <strong>{c.number}</strong>
+            {c.name ? <code>{c.name}</code> : <span className="badge badge-warn">unknown name</span>} <ArrowLeftRight size={13} className="inline-icon" /> <strong>{c.number}</strong>
           </div>
         </div>
       );

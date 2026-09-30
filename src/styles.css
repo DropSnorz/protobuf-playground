@@ -1895,3 +1895,52 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─────────────────────────── icons (lucide) ─────────────────────────── */
+.btn,
+.play-btn,
+.link-toggle,
+.diff-sev,
+.observe-title,
+.waiting-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.play-btn,
+.diff-sev {
+  justify-content: center;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+}
+
+.observe-title,
+.waiting-inner {
+  display: flex;
+}
+
+.inline-icon {
+  vertical-align: -2px;
+}
+
+.badge svg {
+  display: block;
+}
+
+.menu-open .menu-btn,
+.menu-btn {
+  align-items: center;
+  gap: 6px;
+}
+
+.phases {
+  flex-wrap: wrap;
+}
+
+.phase {
+  flex: 1 1 auto;
+}

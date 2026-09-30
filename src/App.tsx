@@ -1,3 +1,4 @@
+import { Menu } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BottomTabs } from './components/BottomTabs';
 import { Brief } from './components/Brief';
@@ -299,7 +300,7 @@ export default function App() {
         <div className="scrim" onClick={() => setMenuOpen(false)} />
         <main className="main">
           <button className="menu-btn" onClick={() => setMenuOpen(true)} aria-label="Open scenarios">
-            ☰ Scenarios
+            <Menu size={16} /> Scenarios
           </button>
           <Brief
             scenario={scenario}
@@ -382,7 +383,7 @@ export default function App() {
             cAnn={cAnn}
             diff={diff}
             linked={ws.linked}
-            json={(inc) => (dec?.message && cSchema ? JSON.stringify(toJson(dec.message, inc, cSchema), null, 2) : dec?.error?.message ?? '—')}
+            json={(inc) => (dec?.message && cSchema ? JSON.stringify(toJson(dec.message, inc, cSchema), null, 2) : dec?.error?.message ?? '-')}
             steps={steps}
             index={idx}
             onIndex={(i) => {

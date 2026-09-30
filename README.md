@@ -1,7 +1,7 @@
 # Protobuf Playground
 
 An in-browser playground to understand how **protobuf (proto3)** messages are serialized, sent and
-deserialized — and what happens when the **producer** and the **consumer** don't use the same version
+deserialized, and what happens when the **producer** and the **consumer** don't use the same version
 of the `.proto`.
 
 Everything runs client-side: nothing is uploaded anywhere.
@@ -9,7 +9,7 @@ Everything runs client-side: nothing is uploaded anywhere.
 ## Features
 
 - **Producer / Wire / Consumer** layout: edit the producer `.proto` and message (JSON), and the
-  consumer `.proto` — linked to the producer by default, or edited separately to simulate another
+  consumer `.proto`, linked to the producer by default, or edited separately to simulate another
   version.
 - **Step-by-step animation**: serialization field by field (tag, length prefix, value), bytes
   travelling over the wire, then parsing record by record against the consumer schema.
@@ -44,7 +44,7 @@ npm run build     # static site in dist/ (relative paths: host it anywhere)
 
 | Piece | Where |
 | --- | --- |
-| `.proto` parsing (into a simplified model) | `src/proto/schema.ts` — uses [protobuf.js](https://github.com/protobufjs/protobuf.js) only for parsing |
+| `.proto` parsing (into a simplified model) | `src/proto/schema.ts`, uses [protobuf.js](https://github.com/protobufjs/protobuf.js) only for parsing |
 | Annotated encoder (JSON → bytes + trace) | `src/proto/encoder.ts` |
 | Annotated decoder (bytes + consumer schema → result + trace) | `src/proto/decoder.ts` |
 | Animation timeline | `src/proto/steps.ts` |

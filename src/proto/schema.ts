@@ -58,7 +58,7 @@ export function parseSchema(source: string): ParseResult {
     warnings.push(
       syntaxMatch || editionMatch
         ? `This playground focuses on proto3 (found ${syntax}); presence rules follow the declared syntax.`
-        : 'No `syntax = "proto3";` line — protoc would treat this file as proto2.',
+        : 'No `syntax = "proto3";` line: protoc would treat this file as proto2.',
     );
   }
 
