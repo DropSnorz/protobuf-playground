@@ -136,32 +136,29 @@ a {
 
 .columns {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'prod cons'
+    'wire wire';
   gap: 14px;
   align-items: start;
+}
+
+.columns > .side-panel:first-child {
+  grid-area: prod;
+}
+
+.columns > .wire-panel {
+  grid-area: wire;
+}
+
+.columns > .side-panel:last-child {
+  grid-area: cons;
 }
 
 .menu-btn,
 .scrim {
   display: none;
-}
-
-@media (max-width: 1560px) {
-  .columns {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-areas:
-      'wire wire'
-      'prod cons';
-  }
-  .columns > .side-panel:first-child {
-    grid-area: prod;
-  }
-  .columns > .wire-panel {
-    grid-area: wire;
-  }
-  .columns > .side-panel:last-child {
-    grid-area: cons;
-  }
 }
 
 @media (max-width: 1060px) {
@@ -932,6 +929,39 @@ a {
 .wire-panel {
   display: flex;
   flex-direction: column;
+}
+
+/* Wide screens: controls and explanation on the left, byte buffers on the right. */
+@media (min-width: 1200px) {
+  .wire-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    grid-template-rows: auto auto auto auto 1fr;
+    grid-template-areas:
+      'head head'
+      'phases stage'
+      'player stage'
+      'step stage'
+      '. stage';
+    align-items: start;
+  }
+  .wire-panel > .panel-head {
+    grid-area: head;
+  }
+  .wire-panel > .phases {
+    grid-area: phases;
+  }
+  .wire-panel > .player {
+    grid-area: player;
+  }
+  .wire-panel > .step-card {
+    grid-area: step;
+  }
+  .wire-panel > .stage,
+  .wire-panel > .hex-editor {
+    grid-area: stage;
+    padding-top: 10px;
+  }
 }
 
 .phases {
