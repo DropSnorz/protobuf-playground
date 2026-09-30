@@ -40,6 +40,12 @@ npm test          # encoder/decoder, scenarios and schema-diff tests
 npm run build     # static site in dist/ (relative paths: host it anywhere)
 ```
 
+## Deployment
+
+`.github/workflows/deploy.yml` runs the tests, builds the site and publishes `dist/` to GitHub Pages
+on every push to `main` (it can also be started by hand from the Actions tab). One-time setup: in
+the repository settings, under **Pages**, set **Source** to **GitHub Actions**.
+
 ## How it works
 
 | Piece | Where |
