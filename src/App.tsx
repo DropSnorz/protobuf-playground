@@ -64,8 +64,17 @@ function initialWorkspace(): Workspace {
       /* ignore malformed links */
     }
   }
-  const s = scenarioById(params.get('s')) ?? scenarioById(DEFAULT_SCENARIO_ID)!;
+  // `#s=id`, or a bare `#id` (some embedding hosts only forward plain anchors).
+  const s = scenarioById(params.get('s')) ?? scenarioById(hash) ?? scenarioById(DEFAULT_SCENARIO_ID)!;
   return fromScenario(s);
+}
+
+function setUrl(url: string) {
+  try {
+    window.history.replaceState(null, '', url);
+  } catch {
+    /* sandboxed frames may refuse history updates */
+  }
 }
 
 function jsonErrorLine(msg: string, text: string): number | undefined {
@@ -263,14 +272,14 @@ export default function App() {
     setEpoch((e) => e + 1);
     setHover(null);
     setMenuOpen(false);
-    window.history.replaceState(null, '', `#s=${id}`);
+    setUrl(`#s=${id}`);
   };
 
   const share = async () => {
     const url = modified
       ? `${location.origin}${location.pathname}#w=${b64url.enc(JSON.stringify(ws))}`
       : `${location.origin}${location.pathname}#s=${ws.scenarioId}`;
-    window.history.replaceState(null, '', url);
+    setUrl(url);
     try {
       await navigator.clipboard.writeText(url);
     } catch {
