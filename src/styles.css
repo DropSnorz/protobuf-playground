@@ -146,7 +146,7 @@ a {
   display: none;
 }
 
-@media (max-width: 1440px) {
+@media (max-width: 1560px) {
   .columns {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
@@ -1013,6 +1013,7 @@ a {
 
 .player {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   padding: 10px 12px 4px;
@@ -1055,7 +1056,7 @@ a {
 }
 
 .scrubber {
-  flex: 1;
+  flex: 1 1 120px;
   accent-color: var(--accent);
   min-width: 60px;
 }
