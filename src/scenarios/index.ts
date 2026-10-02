@@ -18,7 +18,7 @@ export const CATEGORIES = [
 const ORDER_PROTO = proto(`
 package shop;
 
-// Edit this schema, the message JSON, or the consumer schema on the right.
+// Edit this schema, the message JSON, or the consumer schema.
 enum Status {
   STATUS_UNSPECIFIED = 0;
   PENDING = 1;
@@ -57,7 +57,7 @@ export const SCENARIOS: Scenario[] = [
     verdict: 'learn',
     summary: 'Nested, repeated, enum and map fields together.',
     description: [
-      'The **producer** (left) serializes the JSON message with its `.proto`; the bytes travel over the wire; the **consumer** (right) parses them with *its own* `.proto`.',
+      'The **producer** serializes the JSON message with its `.proto`; the bytes travel over the wire; the **consumer** parses them with *its own* `.proto`.',
       'Press **Play** to watch each field being turned into bytes and read back. Hover any byte to see what it means on both sides.',
       'Edit anything: the schemas, the message, or unlink the consumer schema to simulate a different version.',
     ],
