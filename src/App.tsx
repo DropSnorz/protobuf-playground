@@ -9,6 +9,7 @@ import { WirePanel } from './components/WirePanel';
 import { decode, toJson } from './proto/decoder';
 import { diffSchemas } from './proto/diff';
 import { encode } from './proto/encoder';
+import { stringifyJson } from './proto/json';
 import { matchTypeName, parseSchema } from './proto/schema';
 import { buildSteps } from './proto/steps';
 import { annotateBytes, walk, type Range, type TraceNode } from './proto/trace';
@@ -35,7 +36,7 @@ function fromScenario(s: Scenario): Workspace {
     consumerProto: c.proto,
     consumerType: c.type,
     linked: !s.consumer,
-    valueText: JSON.stringify(s.value, null, 2),
+    valueText: stringifyJson(s.value, 2),
     wireHex: s.wireHex ? (parseHex(s.wireHex) as Uint8Array).reduce((a, b) => a + b.toString(16).padStart(2, '0').toUpperCase() + ' ', '').trim() : null,
   };
 }
@@ -360,7 +361,7 @@ export default function App() {
             cAnn={cAnn}
             diff={diff}
             linked={ws.linked}
-            json={(inc) => (dec?.message && cSchema ? JSON.stringify(toJson(dec.message, inc, cSchema), null, 2) : dec?.error?.message ?? '-')}
+            json={(inc) => (dec?.message && cSchema ? stringifyJson(toJson(dec.message, inc, cSchema), 2) : dec?.error?.message ?? '-')}
             steps={steps}
             index={idx}
             onIndex={(i) => {
