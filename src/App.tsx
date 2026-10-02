@@ -9,6 +9,7 @@ import { WirePanel } from './components/WirePanel';
 import { decode, toJson } from './proto/decoder';
 import { diffSchemas } from './proto/diff';
 import { encode } from './proto/encoder';
+import { stringifyJson } from './proto/json';
 import { matchTypeName, parseSchema } from './proto/schema';
 import { buildSteps } from './proto/steps';
 import { annotateBytes, walk, type Range, type TraceNode } from './proto/trace';
@@ -35,18 +36,12 @@ function fromScenario(s: Scenario): Workspace {
     consumerProto: c.proto,
     consumerType: c.type,
     linked: !s.consumer,
-    valueText: JSON.stringify(s.value, null, 2),
+    valueText: stringifyJson(s.value, 2),
     wireHex: s.wireHex ? (parseHex(s.wireHex) as Uint8Array).reduce((a, b) => a + b.toString(16).padStart(2, '0').toUpperCase() + ' ', '').trim() : null,
   };
 }
 
 const b64url = {
-  enc(s: string) {
-    const bytes = new TextEncoder().encode(s);
-    let bin = '';
-    bytes.forEach((b) => (bin += String.fromCharCode(b)));
-    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  },
   dec(s: string) {
     const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/'));
     return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
@@ -93,7 +88,6 @@ export default function App() {
   const [speed, setSpeed] = useState(1300);
   const [hover, setHover] = useState<Highlight | null>(null);
   const [hoverByte, setHoverByte] = useState<number | null>(null);
-  const [shared, setShared] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   // Bumped whenever the workspace is replaced from outside the editors, to remount them
   // (the CodeMirror wrapper may ignore external value changes right after user input).
@@ -276,20 +270,6 @@ export default function App() {
     setUrl(`#s=${id}`);
   };
 
-  const share = async () => {
-    const url = modified
-      ? `${location.origin}${location.pathname}#w=${b64url.enc(JSON.stringify(ws))}`
-      : `${location.origin}${location.pathname}#s=${ws.scenarioId}`;
-    setUrl(url);
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      /* clipboard may be unavailable; the URL is in the address bar anyway */
-    }
-    setShared(true);
-    window.setTimeout(() => setShared(false), 1800);
-  };
-
   const errorRange = dec && !dec.ok && dec.error ? { start: dec.error.offset, end: dec.error.end } : undefined;
   const hoverRanges = hover?.ranges ?? [];
 
@@ -306,8 +286,6 @@ export default function App() {
             scenario={scenario}
             modified={modified}
             onReset={() => scenario && selectScenario(scenario.id)}
-            onShare={share}
-            shared={shared}
           />
           <div className="columns">
             <ProducerPanel
@@ -383,7 +361,7 @@ export default function App() {
             cAnn={cAnn}
             diff={diff}
             linked={ws.linked}
-            json={(inc) => (dec?.message && cSchema ? JSON.stringify(toJson(dec.message, inc, cSchema), null, 2) : dec?.error?.message ?? '-')}
+            json={(inc) => (dec?.message && cSchema ? stringifyJson(toJson(dec.message, inc, cSchema), 2) : dec?.error?.message ?? '-')}
             steps={steps}
             index={idx}
             onIndex={(i) => {
@@ -392,7 +370,7 @@ export default function App() {
             }}
           />
           <footer className="foot">
-            Keyboard: <kbd>space</kbd> play/pause · <kbd>←</kbd> <kbd>→</kbd> step · <kbd>Home</kbd>/<kbd>End</kbd>. Encoding & decoding are implemented from
+            Encoding & decoding are implemented from
             scratch in TypeScript following the{' '}
             <a href="https://protobuf.dev/programming-guides/encoding/" target="_blank" rel="noreferrer">
               protobuf encoding spec

@@ -480,22 +480,17 @@ a {
   gap: 6px;
 }
 
-.role-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+.role-icon {
+  flex: none;
 }
 .role-producer {
-  background: var(--producer);
-  box-shadow: 0 0 0 3px #dbe6ff;
+  color: var(--producer);
 }
 .role-consumer {
-  background: var(--consumer);
-  box-shadow: 0 0 0 3px #d4f3e7;
+  color: var(--consumer);
 }
 .role-wire {
-  background: var(--wire);
-  box-shadow: 0 0 0 3px #ece3ff;
+  color: var(--wire);
 }
 
 .version {
@@ -669,11 +664,6 @@ a {
   font-size: 19px;
   margin: 0;
   letter-spacing: -0.01em;
-}
-
-.brief-cat {
-  font-size: 12px;
-  color: var(--muted);
 }
 
 .brief-actions {
@@ -1039,6 +1029,13 @@ a {
 }
 .phase-active.phase-ok .phase-num {
   background: var(--ok);
+}
+.phase-active.phase-unknown {
+  background: #f1f1f4;
+  border-color: #d6d6dc;
+}
+.phase-active.phase-unknown .phase-num {
+  background: var(--unknown);
 }
 
 .player {

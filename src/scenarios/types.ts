@@ -12,7 +12,7 @@ export interface Scenario {
   category: string;
   title: string;
   verdict: Verdict;
-  /** One-liner shown in the sidebar tooltip and brief. */
+  /** Short one-liner shown under the title in the sidebar. */
   summary: string;
   /** Paragraphs; supports `code`, **bold** and *italic*. */
   description: string[];

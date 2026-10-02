@@ -40,7 +40,7 @@ export function Sidebar({ current, onSelect, modified }: { current: string | nul
         <span className="brand-logo">pb</span>
         <div>
           <div className="brand-name">Protobuf Playground</div>
-          <div className="brand-sub">proto3 wire format, live</div>
+          <div className="brand-sub">Encode, send, decode, step by step</div>
         </div>
       </div>
       <input className="search" placeholder="Search scenarios…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search scenarios" />

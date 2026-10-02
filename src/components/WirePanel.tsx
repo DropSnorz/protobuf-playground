@@ -1,4 +1,4 @@
-import { Pencil, Undo2 } from 'lucide-react';
+import { Cable, Pencil, Undo2 } from 'lucide-react';
 import { useState } from 'react';
 import type { Step } from '../proto/steps';
 import type { ByteInfo, Range } from '../proto/trace';
@@ -52,7 +52,7 @@ export function WirePanel(p: Props) {
     <section className="panel wire-panel" aria-label="Wire">
       <header className="panel-head">
         <div className="panel-title">
-          <span className="role-dot role-wire" />
+          <Cable size={15} className="role-icon role-wire" aria-hidden />
           <h2>Wire</h2>
           <span className="chip-count">{total} bytes</span>
           {p.override !== null && <span className="badge badge-warn">hand-crafted</span>}
@@ -202,7 +202,6 @@ export function WirePanel(p: Props) {
             <span className="chip role-value fc-0">41</span> value
             <span className="chip role-value fc-unknown">7F</span> unknown field
             <span className="chip chip-error role-value fc-error">C3</span> error
-            <span className="muted">· same color = same field number</span>
           </div>
         </div>
       )}

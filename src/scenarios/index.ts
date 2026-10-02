@@ -18,7 +18,7 @@ export const CATEGORIES = [
 const ORDER_PROTO = proto(`
 package shop;
 
-// Edit this schema, the message JSON, or the consumer schema on the right.
+// Edit this schema, the message JSON, or the consumer schema.
 enum Status {
   STATUS_UNSPECIFIED = 0;
   PENDING = 1;
@@ -53,11 +53,11 @@ export const SCENARIOS: Scenario[] = [
   {
     id: 'playground',
     category: 'Start here',
-    title: 'Playground: an Order',
+    title: 'Playground',
     verdict: 'learn',
-    summary: 'A realistic message with nesting, repeated fields, an enum and a map.',
+    summary: 'Nested, repeated, enum and map fields together.',
     description: [
-      'The **producer** (left) serializes the JSON message with its `.proto`; the bytes travel over the wire; the **consumer** (right) parses them with *its own* `.proto`.',
+      'The **producer** serializes the JSON message with its `.proto`; the bytes travel over the wire; the **consumer** parses them with *its own* `.proto`.',
       'Press **Play** to watch each field being turned into bytes and read back. Hover any byte to see what it means on both sides.',
       'Edit anything: the schemas, the message, or unlink the consumer schema to simulate a different version.',
     ],
@@ -87,7 +87,7 @@ export const SCENARIOS: Scenario[] = [
     category: 'Wire format basics',
     title: 'Varints: encoding 150',
     verdict: 'learn',
-    summary: 'How an integer becomes 1–10 bytes.',
+    summary: '7 bits per byte; the top bit means “more”.',
     description: [
       'The example from the official encoding guide: `a = 150` serializes to `08 96 01`.',
       '`08` is the **tag**: `(field_number << 3) | wire_type` = `(1 << 3) | 0`. Then 150 is a **varint**: split into 7-bit groups, least-significant group first, each byte having its high bit (MSB) set when more bytes follow.',
@@ -101,7 +101,7 @@ export const SCENARIOS: Scenario[] = [
     category: 'Wire format basics',
     title: 'Field numbers 1–15 are cheaper',
     verdict: 'learn',
-    summary: 'The tag itself is a varint: big field numbers cost more bytes.',
+    summary: 'Fields 1–15 fit in a 1-byte tag; 16+ need 2.',
     description: [
       'Every record starts with a tag = `(field_number << 3) | wire_type`, encoded as a varint.',
       'Field numbers 1–15 fit in **one** tag byte, 16–2047 need **two**, 2048–262143 need **three**. Reserve 1–15 for frequently-set fields.',
@@ -125,7 +125,7 @@ message Tags {
     category: 'Wire format basics',
     title: 'Negative numbers: int32 vs sint32',
     verdict: 'learn',
-    summary: 'int32 -1 costs 10 bytes; sint32 -1 costs 1 byte thanks to ZigZag.',
+    summary: '-1 costs 10 bytes as int32, 1 byte as sint32.',
     description: [
       '`int32`/`int64` store negative numbers as 64-bit two\'s complement: the varint is **always 10 bytes**.',
       '`sint32`/`sint64` first apply **ZigZag** encoding (`0→0, -1→1, 1→2, -2→3…`) so small magnitudes stay small.',
@@ -149,7 +149,7 @@ message Numbers {
     category: 'Wire format basics',
     title: 'Fixed-width: fixed32, float, double',
     verdict: 'learn',
-    summary: 'I32 / I64 wire types: always 4 or 8 bytes, little-endian.',
+    summary: 'Always 4 or 8 bytes, little-endian.',
     description: [
       '`fixed32`, `sfixed32` and `float` use wire type **I32** (5): exactly 4 bytes, little-endian. `fixed64`, `sfixed64` and `double` use **I64** (1): 8 bytes.',
       'Fixed types beat varints for large values (e.g. hashes, IDs > 2^28) and are cheaper to parse.',
@@ -173,7 +173,7 @@ message Measure {
     category: 'Wire format basics',
     title: 'Strings & bytes (length-delimited)',
     verdict: 'learn',
-    summary: 'LEN records: tag, length varint, raw payload.',
+    summary: 'Tag, then a length, then the raw bytes.',
     description: [
       'Wire type **LEN** (2) is used for `string`, `bytes`, embedded messages and packed repeated fields: the tag is followed by a varint length, then that many bytes.',
       '`string` must be valid **UTF-8**: non-ASCII characters take 2–4 bytes. `bytes` in JSON are base64.',
@@ -195,7 +195,7 @@ message Text {
     category: 'Wire format basics',
     title: 'Field order on the wire does not matter',
     verdict: 'learn',
-    summary: 'Records may arrive in any order; parsers must accept it.',
+    summary: 'Parsers accept fields in any order.',
     description: [
       'Serializers usually write fields in field-number order, but parsers must accept **any order**, for example when messages are concatenated or a proxy appends fields.',
       'Here the bytes were hand-crafted with field 2 before field 1.',
@@ -210,7 +210,7 @@ message Text {
     category: 'Wire format basics',
     title: 'An all-default message is 0 bytes',
     verdict: 'learn',
-    summary: 'Nothing set → nothing written.',
+    summary: 'Unset fields write nothing.',
     description: [
       'In proto3, fields holding their default value (0, "", false, first enum value, empty list) are not serialized. A message where everything is default serializes to **zero bytes**, and that is a valid message.',
     ],
@@ -236,7 +236,7 @@ message Settings {
     category: 'Presence & default values',
     title: 'Default values are not sent',
     verdict: 'learn',
-    summary: 'Implicit presence: 0 and "not set" look identical.',
+    summary: 'Zero values are skipped: 0 looks like “unset”.',
     description: [
       'Plain proto3 scalar fields have **implicit presence**: the serializer writes them only if they differ from the default.',
       'As a result, the consumer cannot know whether `stock = 0` was sent explicitly or never set.',
@@ -259,7 +259,7 @@ message Product {
     category: 'Presence & default values',
     title: 'proto3 `optional`: explicit presence',
     verdict: 'learn',
-    summary: '`optional` fields are written even when zero, and have has_xxx().',
+    summary: 'optional sends zero values and tracks presence.',
     description: [
       'Since protobuf 3.15, `optional` brings back **explicit presence**: the field is written whenever it is *set*, even to 0, and the consumer gets a `has_stock()` accessor.',
       'Under the hood `optional int32 stock` is a synthetic one-field oneof.',
@@ -282,7 +282,7 @@ message Product {
     category: 'Presence & default values',
     title: 'Producer without presence, consumer with `optional`',
     verdict: 'caution',
-    summary: 'The consumer checks has_discount(), but the producer never sent the 0.',
+    summary: 'The 0 is never sent, so has_discount() is false.',
     description: [
       'The producer uses a plain `int32 discount` and sets it to 0 → nothing on the wire. The consumer, newer, declares `optional int32 discount` and relies on `has_discount()` to tell "no discount" from "0%".',
       'Adding `optional` is wire-compatible, but presence information only exists if the **producer** tracks it.',
@@ -297,7 +297,7 @@ message Product {
     category: 'Presence & default values',
     title: '-0.0 is not the default',
     verdict: 'learn',
-    summary: 'Presence is checked on the bits, not on numeric equality.',
+    summary: '-0.0 has non-zero bits, so it is sent.',
     description: [
       'For `float`/`double`, proto3 compares the **bit pattern** with zero. `-0.0 == 0.0` numerically, but its sign bit is set, so it is serialized.',
     ],
@@ -310,7 +310,7 @@ message Product {
     category: 'Presence & default values',
     title: 'An empty sub-message is still sent',
     verdict: 'learn',
-    summary: 'Message fields always have presence.',
+    summary: 'Sent as a zero-length record.',
     description: [
       'Sub-message fields always track presence. Setting `shipping` to an empty object still writes the record (tag + length `00`), so the consumer knows it is present.',
     ],
@@ -334,7 +334,7 @@ message Checkout {
     category: 'Collections & structure',
     title: 'Repeated: packed vs unpacked',
     verdict: 'learn',
-    summary: 'proto3 packs repeated numbers by default.',
+    summary: 'Packed: one tag + length for all numbers.',
     description: [
       'Repeated scalar numeric fields are **packed** by default in proto3: one tag, one length, then all values back to back.',
       'With `[packed = false]` each element gets its own tag.',
@@ -355,7 +355,7 @@ message Series {
     category: 'Collections & structure',
     title: 'Repeated strings & messages',
     verdict: 'learn',
-    summary: 'Length-delimited elements can never be packed.',
+    summary: 'One tag per element: they cannot be packed.',
     description: ['`string`, `bytes` and message elements are each written as a separate LEN record with the same tag.'],
     observe: ['The tag `0A` appears once per tag string, `12` once per item.'],
     producer: {
@@ -374,7 +374,7 @@ message Cart {
     category: 'Collections & structure',
     title: 'Nested messages (4 levels)',
     verdict: 'learn',
-    summary: 'Length prefixes all the way down.',
+    summary: 'Each level adds a tag and a length prefix.',
     description: [
       'An embedded message is serialized *first*, then written as a LEN record. Each level adds a tag and a length prefix.',
       'That is why nested length prefixes must be computed bottom-up by the serializer.',
@@ -407,7 +407,7 @@ message Address {
     category: 'Collections & structure',
     title: 'Recursive message: a tree',
     verdict: 'learn',
-    summary: 'A message can contain itself.',
+    summary: 'A message type that contains itself.',
     description: ['Recursive types work: each child is another embedded LEN record. Parsers enforce a recursion limit (100 by default in C++/Java).'],
     observe: ['The same tag `12` (children) appears at several depths.'],
     producer: {
@@ -425,7 +425,7 @@ message TreeNode {
     category: 'Collections & structure',
     title: 'Maps are repeated entries',
     verdict: 'learn',
-    summary: '`map<K,V>` = `repeated Entry { K key = 1; V value = 2; }`.',
+    summary: 'Each entry is a sub-message: key = 1, value = 2.',
     description: [
       'Maps have no wire type of their own. Each entry is a LEN record containing a tiny message with `key` = field 1 and `value` = field 2.',
       'Order is not preserved and duplicate keys resolve to the last one.',
@@ -447,7 +447,7 @@ message Inventory {
     category: 'Collections & structure',
     title: 'Oneof',
     verdict: 'learn',
-    summary: 'At most one member is set, and it is written even when zero.',
+    summary: 'Only the set member is sent, even if zero.',
     description: [
       'A `oneof` is a set of fields where at most one can be set. On the wire the members are ordinary fields; the *parser* clears the others when one is read.',
       'Oneof members have presence: `cash = false` is still written because it is the active case.',
@@ -473,7 +473,7 @@ message Payment {
     category: 'Collections & structure',
     title: 'Several message types in one file',
     verdict: 'learn',
-    summary: 'Pick which message to serialize. The bytes never say which type they are.',
+    summary: 'The bytes never say which type they are.',
     description: [
       'A `.proto` file usually declares many messages and enums, including nested types (`Event.Kind`) and shared ones.',
       'Use the **type selector** above the editors to choose the root message on each side. Nothing on the wire identifies the type: sender and receiver must agree out-of-band (topic, RPC method, `Any` type URL…).',
@@ -521,7 +521,7 @@ message Envelope {
     category: 'Evolution: safe changes',
     title: 'New field, old consumer',
     verdict: 'compatible',
-    summary: 'Forward compatibility: unknown fields are skipped and preserved.',
+    summary: 'Unknown fields are skipped and kept.',
     description: [
       'The producer (v2) added `phone = 4`. The consumer (v1) does not know field 4.',
       'The wire type tells the parser how many bytes to skip. Since protobuf 3.5, unknown fields are **kept** and re-emitted if the consumer re-serializes the message (important for proxies).',
@@ -555,7 +555,7 @@ message Contact {
     category: 'Evolution: safe changes',
     title: 'New field, old producer',
     verdict: 'compatible',
-    summary: 'Backward compatibility: missing fields read as defaults.',
+    summary: 'Missing fields read as defaults.',
     description: [
       'The consumer (v2) expects `phone = 4` and `loyalty_points = 5`; the producer (v1) never sends them.',
       'They read as their defaults. Make sure your code treats the default as "unknown / not provided" when that matters, or use `optional`.',
@@ -590,7 +590,7 @@ message Contact {
     category: 'Evolution: safe changes',
     title: 'Renamed field (same number)',
     verdict: 'compatible',
-    summary: 'Only field numbers are on the wire, not names.',
+    summary: 'Safe: names are not on the wire.',
     description: [
       'The consumer renamed `user_name` to `login`. The binary format only carries field **numbers**, so nothing changes on the wire.',
       'Renaming still breaks the JSON mapping and anything that uses field names (FieldMasks, reflection-based code).',
@@ -605,7 +605,7 @@ message Contact {
     category: 'Evolution: safe changes',
     title: 'Removed field + `reserved`',
     verdict: 'compatible',
-    summary: 'Delete fields safely by reserving their number and name.',
+    summary: 'Reserve the number so it is never reused.',
     description: [
       'The consumer deleted `fax` and marked `reserved 3; reserved "fax";` so nobody can reuse number 3 with a different meaning later.',
       'Old producers still send #3: it becomes an unknown field.',
@@ -639,7 +639,7 @@ message Contact {
     category: 'Evolution: safe changes',
     title: 'Packed to unpacked',
     verdict: 'compatible',
-    summary: 'Parsers accept both encodings of repeated numbers.',
+    summary: 'Safe: parsers accept both encodings.',
     description: [
       'The producer uses `[packed = false]` (e.g. an old proto2-era writer), the consumer the proto3 default (packed).',
       'Parsers are required to accept both forms, so toggling `packed` is safe.',
@@ -654,7 +654,7 @@ message Contact {
     category: 'Evolution: safe changes',
     title: 'Widening int32 → int64',
     verdict: 'compatible',
-    summary: 'Same varint encoding: widening is safe.',
+    summary: 'Safe: same varint encoding.',
     description: [
       '`int32`, `uint32`, `int64`, `uint64` and `bool` share the VARINT wire type. Widening from 32 to 64 bits is always safe, including for negative numbers, because `int32` already sign-extends to 64 bits.',
     ],
@@ -668,7 +668,7 @@ message Contact {
     category: 'Evolution: safe changes',
     title: 'Singular → repeated',
     verdict: 'compatible',
-    summary: 'A single value arrives as a one-element list.',
+    summary: 'The value arrives as a one-element list.',
     description: [
       'Turning `string tag` into `repeated string tags` (same number) is compatible: a repeated field is the same record appearing several times.',
     ],
@@ -682,7 +682,7 @@ message Contact {
     category: 'Evolution: safe changes',
     title: 'Message type renamed',
     verdict: 'compatible',
-    summary: 'Type names are not on the wire either.',
+    summary: 'Safe: type names are not on the wire.',
     description: [
       'The consumer calls the message `Account` and the nested type `Money` instead of `UserProfile` / `Amount`. Binary serialization does not care.',
       'Type names do matter for `google.protobuf.Any` (type URL) and gRPC service paths.',
@@ -717,7 +717,7 @@ message Account {
     category: 'Evolution: safe changes',
     title: 'string → bytes',
     verdict: 'compatible',
-    summary: 'Both are LEN: bytes receives the raw UTF-8.',
+    summary: 'Safe: bytes receives the raw UTF-8.',
     description: ['`string` and `bytes` are both length-delimited. A `bytes` consumer gets the raw UTF-8 bytes. The opposite direction only works for valid UTF-8 (see the breaking changes).'],
     observe: ['`é` shows up as `C3 A9` on the consumer side.'],
     producer: { proto: proto('message Doc {\n  string body = 1;\n}'), type: '.Doc', label: 'text' },
@@ -729,7 +729,7 @@ message Account {
     category: 'Evolution: safe changes',
     title: 'Embedded message read as `bytes`',
     verdict: 'compatible',
-    summary: 'Envelope pattern: forward a payload without parsing it.',
+    summary: 'Forward a payload without parsing it.',
     description: [
       'An embedded message is plain LEN bytes. A router can declare the payload as `bytes` and forward it untouched, without depending on the payload schema. This is the common *envelope* pattern.',
     ],
@@ -752,7 +752,7 @@ message Envelope {
     category: 'Evolution: safe changes',
     title: 'map to repeated entry message',
     verdict: 'compatible',
-    summary: 'A map is wire-identical to a repeated key/value message.',
+    summary: 'Safe: identical bytes on the wire.',
     description: [
       'The consumer declares `repeated LabelsEntry labels` with `string key = 1; string value = 2;`, which is how a map is encoded on the wire.',
       'Useful for languages or tools without map support, or to keep duplicate keys and order.',
@@ -781,7 +781,7 @@ message Pod {
     category: 'Evolution: lossy changes',
     title: 'New enum value, old consumer',
     verdict: 'caution',
-    summary: 'proto3 enums are open: the unknown number is kept.',
+    summary: 'The unknown number is kept as-is.',
     description: [
       'The producer added `REFUNDED = 4`. The old consumer does not know it.',
       'proto3 enums are **open**: the numeric value is preserved (Java: `UNRECOGNIZED` + `getStatusValue() == 4`, C++: plain int). Your `switch` needs a default branch!',
@@ -827,7 +827,7 @@ message Order {
     category: 'Evolution: lossy changes',
     title: 'Enum value renamed',
     verdict: 'compatible',
-    summary: 'Enums travel as numbers.',
+    summary: 'Safe: only the number is sent.',
     description: ['Renaming `SHIPPED` to `DISPATCHED` is binary-safe (the number 3 is sent), but breaks JSON, which uses names.'],
     observe: ['The consumer reads 3 as `DISPATCHED`.'],
     producer: { proto: proto('enum Status { STATUS_UNSPECIFIED = 0; SHIPPED = 3; }\nmessage Parcel {\n  Status status = 1;\n}'), type: '.Parcel', label: 'v1' },
@@ -839,7 +839,7 @@ message Order {
     category: 'Evolution: lossy changes',
     title: 'Narrowing int64 → int32',
     verdict: 'caution',
-    summary: 'Parses fine, silently truncates to 32 bits.',
+    summary: 'Large values are silently truncated.',
     description: [
       'Same VARINT wire type, so there is no error. The consumer keeps only the lower 32 bits, like a C cast.',
     ],
@@ -853,7 +853,7 @@ message Order {
     category: 'Evolution: lossy changes',
     title: 'uint32 to int32: sign flip',
     verdict: 'caution',
-    summary: 'Values ≥ 2^31 come out negative.',
+    summary: 'Values ≥ 2^31 read as negative.',
     description: ['`uint32 4294967295` has the same 32 low bits as `int32 -1`. The consumer reinterprets them as signed.'],
     observe: ['`mask` becomes `-1`, `small` stays `10`.'],
     producer: { proto: proto('message Flags {\n  uint32 mask = 1;\n  uint32 small = 2;\n}'), type: '.Flags', label: 'unsigned' },
@@ -865,7 +865,7 @@ message Order {
     category: 'Evolution: lossy changes',
     title: 'int32 → bool',
     verdict: 'caution',
-    summary: 'Any non-zero varint is `true`.',
+    summary: 'Any non-zero number reads as true.',
     description: ['`bool` is a VARINT too. A count of 42 becomes `true`; the number is lost. A count of 0 was never sent, so it reads as `false`.'],
     observe: ['`retries = 42` → `true` (with a warning).'],
     producer: { proto: proto('message Job {\n  int32 retries = 1;\n}'), type: '.Job', label: 'v1' },
@@ -877,7 +877,7 @@ message Order {
     category: 'Evolution: lossy changes',
     title: 'repeated → singular: last one wins',
     verdict: 'caution',
-    summary: 'Only the last element survives (messages: merged).',
+    summary: 'Only the last element is kept.',
     description: [
       'The consumer declares `string email` where the producer sends `repeated string emails`. Each element is a separate record; for a singular field every new record **overwrites** the previous one.',
       'For a singular *message* field, the records would be **merged** instead.',
@@ -892,7 +892,7 @@ message Order {
     category: 'Evolution: lossy changes',
     title: 'Moving existing fields into a oneof',
     verdict: 'caution',
-    summary: 'If several were set, only the last survives.',
+    summary: 'Only the last set field is kept.',
     description: [
       'The producer has two independent fields; the consumer grouped them into `oneof contact`. When the producer sets both, the consumer keeps **only the last one on the wire**.',
     ],
@@ -908,7 +908,7 @@ message Order {
     category: 'Breaking changes',
     title: 'Changed field number',
     verdict: 'breaking',
-    summary: 'Same name, different number → data lost.',
+    summary: 'Data lost: the numbers no longer match.',
     description: [
       'Someone "tidied up" the numbers: `email` went from 3 to 4. The consumer looks for #4, the producer writes #3.',
       'Field numbers are the contract. **Never change them.**',
@@ -923,7 +923,7 @@ message Order {
     category: 'Breaking changes',
     title: 'Reused field number, new type',
     verdict: 'breaking',
-    summary: 'Wire type mismatch → value unreadable.',
+    summary: 'Wire type mismatch: value unreadable.',
     description: [
       '`age` (#3, int32) was deleted and #3 was reused for `nickname` (string) without being `reserved`. Old producers still send an int at #3.',
       'VARINT ≠ LEN: the consumer cannot interpret the record. C++/Java keep it as an unknown field; some libraries throw.',
@@ -938,7 +938,7 @@ message Order {
     category: 'Breaking changes',
     title: 'int32 to sint32: ZigZag mismatch',
     verdict: 'breaking',
-    summary: 'Same wire type, silently wrong values.',
+    summary: 'Parses, but values are wrong.',
     description: [
       'Both are VARINT, so the parser accepts the values, but `sint32` expects ZigZag encoding. `1` becomes `-1`, `2` becomes `1`, and `-1` (10 bytes of 1s) becomes `-2147483648`.',
       'No error is raised, so the wrong values go unnoticed.',
@@ -953,7 +953,7 @@ message Order {
     category: 'Breaking changes',
     title: 'float to fixed32: reinterpreted bits',
     verdict: 'breaking',
-    summary: 'Same 4 bytes, completely different number.',
+    summary: 'Same 4 bytes read as a different number.',
     description: ['Both are I32: 4 little-endian bytes. The consumer reads the IEEE-754 bits of `1.5` as an unsigned integer.'],
     observe: ['`1.5` becomes `1069547520`.'],
     producer: { proto: proto('message Reading {\n  float value = 1;\n}'), type: '.Reading', label: 'float' },
@@ -965,7 +965,7 @@ message Order {
     category: 'Breaking changes',
     title: 'string → message',
     verdict: 'breaking',
-    summary: 'The text is parsed as protobuf… and fails.',
+    summary: 'The text is parsed as protobuf and fails.',
     description: [
       'Both are LEN, so the consumer tries to parse the UTF-8 text `"hello"` as a `Note` message. `h` = `0x68` = field 13, VARINT; `e`… until `l` = `0x6C` → wire type 4, an invalid group end.',
       'Other text may parse without error and produce wrong fields, which is harder to detect.',
@@ -981,7 +981,7 @@ message Order {
     category: 'Breaking changes',
     title: 'bytes → string with binary data',
     verdict: 'breaking',
-    summary: 'Invalid UTF-8 in a proto3 string → parse failure.',
+    summary: 'Invalid UTF-8 makes parsing fail.',
     description: [
       'The producer sends arbitrary binary in a `bytes` field; the consumer declared it as `string`. proto3 parsers validate UTF-8 for `string` fields and reject the message.',
     ],
@@ -996,7 +996,7 @@ message Order {
     category: 'Breaking changes',
     title: 'Packed repeated → singular number',
     verdict: 'breaking',
-    summary: 'Packed LEN record vs expected VARINT.',
+    summary: 'Wire type mismatch: LEN vs VARINT.',
     description: [
       'The producer packs `repeated int32 scores` into one LEN record. The consumer declares `int32 score` and expects VARINT → wire type mismatch, the values are lost for it.',
       '(An *unpacked* list would have worked, keeping the last value.)',
@@ -1011,7 +1011,7 @@ message Order {
     category: 'Breaking changes',
     title: 'enum → string',
     verdict: 'breaking',
-    summary: 'VARINT vs LEN: unreadable.',
+    summary: 'Wire type mismatch: VARINT vs LEN.',
     description: ['An enum is a VARINT on the wire; a string is LEN. Changing between them breaks every existing message.'],
     observe: ['`status` is lost: mismatch → unknown field, consumer reads `""`.'],
     producer: { proto: proto('enum Status { STATUS_UNSPECIFIED = 0; ACTIVE = 1; }\nmessage Account {\n  Status status = 1;\n}'), type: '.Account', label: 'enum' },
@@ -1023,7 +1023,7 @@ message Order {
     category: 'Breaking changes',
     title: 'Decoded with the wrong message type',
     verdict: 'breaking',
-    summary: 'Parses "successfully" into nonsense.',
+    summary: 'Parses without error into nonsense.',
     description: [
       'Bytes carry no type information. A consumer reading a `UserCreated` event with the `PaymentDone` schema often gets **no error**, only wrong values and unknown fields.',
       'This happens with mis-routed Kafka topics or wrong gRPC stubs. Consider an envelope with a type discriminator or `google.protobuf.Any`.',
@@ -1066,7 +1066,7 @@ message PaymentDone {
     category: 'Malformed & tricky bytes',
     title: 'Duplicate scalar: last one wins',
     verdict: 'learn',
-    summary: 'The same field twice → the later value overwrites.',
+    summary: 'The last value wins.',
     description: ['Hand-crafted bytes contain `id` twice (`08 01` then `08 02`). For singular scalar fields the **last** value on the wire wins; no error.'],
     observe: ['`id` ends up as 2.'],
     producer: { proto: proto('message User {\n  int32 id = 1;\n  string name = 2;\n}'), type: '.User' },
@@ -1078,7 +1078,7 @@ message PaymentDone {
     category: 'Malformed & tricky bytes',
     title: 'Concatenated messages merge',
     verdict: 'learn',
-    summary: 'serialize(A) + serialize(B) parses as merge(A, B).',
+    summary: 'Bytes of A + B parse as A merged with B.',
     description: [
       'Two serialized messages are concatenated: `{name: "Ann", tags: ["a"], address: {city: "Paris"}}` then `{tags: ["b"], address: {zip: 75}}`.',
       'Parsing the concatenation = **merging**: scalars overwritten, repeated fields appended, sub-messages merged recursively. This is why protobuf streams need length-delimiting.',
@@ -1102,7 +1102,7 @@ message Profile {
     category: 'Malformed & tricky bytes',
     title: 'Oneof: two members on the wire',
     verdict: 'caution',
-    summary: 'The parser keeps only the last member.',
+    summary: 'Only the last member is kept.',
     description: ['A buggy writer sent both `email` and `phone`, which belong to the same oneof. The parser does not fail: it keeps the last one read.'],
     observe: ['`phone` wins, `email` is cleared.'],
     producer: { proto: proto('message Person {\n  oneof contact {\n    string email = 1;\n    string phone = 2;\n  }\n}'), type: '.Person' },
@@ -1114,7 +1114,7 @@ message Profile {
     category: 'Malformed & tricky bytes',
     title: 'Map with a duplicate key',
     verdict: 'caution',
-    summary: 'Last entry wins.',
+    summary: 'The last entry wins.',
     description: ['Two entries with key `"a"`. Maps keep the last value for a key.', 'The third entry is empty (`0A 00`): key and value take their defaults, giving an entry with key `""` and value 0.'],
     observe: ['`a → 2`, plus an entry `"" → 0`.'],
     producer: { proto: proto('message Counters {\n  map<string, int32> counts = 1;\n}'), type: '.Counters' },
@@ -1126,7 +1126,7 @@ message Profile {
     category: 'Malformed & tricky bytes',
     title: 'Over-long varint',
     verdict: 'learn',
-    summary: 'Redundant continuation bytes are accepted.',
+    summary: 'Needlessly long varints still parse.',
     description: ['`81 80 80 00` is a valid (but non-canonical) varint for 1: the extra groups are zeros. Parsers accept it; serializers never produce it. This is why byte-for-byte comparison of protobufs is unreliable.'],
     observe: ['`id = 1` read from 4 bytes.'],
     producer: { proto: proto('message User {\n  int32 id = 1;\n}'), type: '.User' },
@@ -1138,7 +1138,7 @@ message Profile {
     category: 'Malformed & tricky bytes',
     title: 'Truncated message',
     verdict: 'breaking',
-    summary: 'A length prefix promising more bytes than available.',
+    summary: 'Length says more bytes than there are.',
     description: ['The `name` record announces 5 bytes but the buffer ends after 3. This happens with a cut network frame or a wrongly sized buffer.'],
     observe: ['Parsing fails and the whole message is rejected, not only `name`.'],
     producer: { proto: proto('message User {\n  int32 id = 1;\n  string name = 2;\n}'), type: '.User' },
@@ -1151,7 +1151,7 @@ message Profile {
     category: 'Malformed & tricky bytes',
     title: 'Truncated varint',
     verdict: 'breaking',
-    summary: 'The last byte still has its continuation bit set.',
+    summary: 'Last byte still says “more follows”.',
     description: ['`96` has MSB = 1, meaning "more bytes follow", but the buffer ends.'],
     observe: ['Parse error at offset 1.'],
     producer: { proto: proto('message Test1 {\n  int32 a = 1;\n}'), type: '.Test1' },
@@ -1164,7 +1164,7 @@ message Profile {
     category: 'Malformed & tricky bytes',
     title: 'Invalid wire type / field 0',
     verdict: 'breaking',
-    summary: 'Tags that cannot exist.',
+    summary: 'Impossible tags make parsing fail.',
     description: [
       'Tag `0F` = field 1, wire type **7**: there are only 6 wire types (0–5, with 3/4 deprecated). Tag `00` would mean field number **0**, also invalid.',
       'Edit the bytes to `00 01` to see the field-0 error.',
@@ -1180,7 +1180,7 @@ message Profile {
     category: 'Malformed & tricky bytes',
     title: 'Invalid UTF-8 in a string',
     verdict: 'breaking',
-    summary: '`C3 28` is not valid UTF-8.',
+    summary: 'C3 28 is not valid UTF-8: parse fails.',
     description: ['`C3` starts a 2-byte sequence but `28` is not a continuation byte. proto3 `string` fields must be valid UTF-8.'],
     observe: ['Parse error on the string payload.'],
     producer: { proto: proto('message Text {\n  string s = 1;\n}'), type: '.Text' },

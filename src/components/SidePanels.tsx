@@ -1,4 +1,4 @@
-import { Hourglass, Link2 } from 'lucide-react';
+import { Hourglass, Inbox, Link2, Send } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import type { DecodedMessage } from '../proto/decoder';
 import type { EncodeIssue } from '../proto/encoder';
@@ -78,7 +78,7 @@ export function ProducerPanel(props: {
     <section className="panel side-panel" aria-label="Producer">
       <header className="panel-head">
         <div className="panel-title">
-          <span className="role-dot role-producer" />
+          <Send size={15} className="role-icon role-producer" aria-hidden />
           <h2>Producer</h2>
           {props.label && <span className="version">{props.label}</span>}
           <span className="muted small">writes</span>
@@ -119,7 +119,7 @@ export function ProducerPanel(props: {
         }
       />
       <div className="tree-title">
-        What gets serialized <span className="muted">in field-number order</span>
+        What gets serialized
       </div>
       {props.overridden && (
         <div className="problem problem-warn">The wire carries hand-crafted bytes: this encoding is shown for reference but is <strong>not</strong> what is sent.</div>
@@ -152,7 +152,7 @@ export function ConsumerPanel(props: {
     <section className="panel side-panel" aria-label="Consumer">
       <header className="panel-head">
         <div className="panel-title">
-          <span className="role-dot role-consumer" />
+          <Inbox size={15} className="role-icon role-consumer" aria-hidden />
           <h2>Consumer</h2>
           {props.label && <span className="version">{props.label}</span>}
           <span className="muted small">reads</span>
