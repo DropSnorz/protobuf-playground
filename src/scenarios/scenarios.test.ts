@@ -37,6 +37,24 @@ describe('scenarios', () => {
     });
   }
 
+  it('final step title matches its status', () => {
+    const expected: Record<string, string> = {
+      'Decoded successfully': 'ok',
+      'Decoded with warnings': 'warn',
+      'Decoded, with unknown fields': 'unknown',
+      'Parsing failed': 'error',
+    };
+    const seen = new Set<string>();
+    for (const s of SCENARIOS) {
+      const r = run(s.id);
+      const steps = buildSteps({ enc: r.enc, dec: r.dec, bytes: r.bytes, override: !!s.wireHex, producerType: s.producer.type, consumerType: r.ctype });
+      const done = steps[steps.length - 1];
+      expect(done.status, `${s.id}: ${done.title}`).toBe(expected[done.title]);
+      seen.add(done.status);
+    }
+    expect([...seen].sort()).toEqual(['error', 'ok', 'unknown', 'warn']);
+  });
+
   it('specific outcomes', () => {
     expect(run('int64-to-int32').json).toEqual({ views: 1, bytes_sent: -1294967296, likes: 42 });
     expect(run('zigzag-mismatch').json).toEqual({ a: -1, b: 1, c: -2147483648 });

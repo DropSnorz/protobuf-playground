@@ -313,11 +313,19 @@ export function buildSteps(opts: {
     } else {
       detail.push(dec.error!.message);
     }
+    // Title and status must agree, since the status drives the card colour.
+    const [title, status]: [string, Step['status']] = !dec.ok
+      ? ['Parsing failed', 'error']
+      : s.warnings
+        ? ['Decoded with warnings', 'warn']
+        : s.unknown
+          ? ['Decoded, with unknown fields', 'unknown']
+          : ['Decoded successfully', 'ok'];
     steps.push({
       phase: 'done',
-      title: dec.ok ? (s.warnings || s.unknown ? 'Decoded with warnings' : 'Decoded successfully') : 'Parsing failed',
+      title,
       detail,
-      status: dec.ok ? (s.warnings ? 'warn' : 'ok') : 'error',
+      status,
       emitted: total,
       consumed: dec.ok ? total : dec.error!.end,
       calc: [],

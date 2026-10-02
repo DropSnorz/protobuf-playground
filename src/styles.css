@@ -1030,6 +1030,13 @@ a {
 .phase-active.phase-ok .phase-num {
   background: var(--ok);
 }
+.phase-active.phase-unknown {
+  background: #f1f1f4;
+  border-color: #d6d6dc;
+}
+.phase-active.phase-unknown .phase-num {
+  background: var(--unknown);
+}
 
 .player {
   display: flex;
